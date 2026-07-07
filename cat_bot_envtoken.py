@@ -142,7 +142,8 @@ Traits:
 RULES:
 - One paragraph only.
 - Tone: warm, slightly whimsical, like a real shelter trying to make the cat sound charming.
-- Include the cat's likes, dislikes, and sound naturally in the paragraph.
+- Include the cat's likes, dislikes, and sound naturally in the paragraph. Do not capitalize the likes, dislikes, or sound
+- When you mention what the cat likes/dislike and the sound it makes, reword it to sound organic and natural.
 - You may hint at a tiny backstory, but keep it grounded.
 - Do NOT include meta commentary.
 - Do NOT list traits; weave them into the prose.
@@ -155,7 +156,7 @@ Output ONLY this single line + paragraph.
 
     response = requests.post(
         "http://127.0.0.1:11434/api/generate",
-        json={"model": "llama3.2:3b", "prompt": prompt, "stream": False, "temperature": 1.1}
+        json={"model": "llama3.2:3b", "prompt": prompt, "stream": False, "temperature": 1.6}
     )
     return response.json()["response"].strip()
 
@@ -223,13 +224,16 @@ def generate_cat_image(cat_bio):
     prompt = (
         f"<lora:hqcat:0.9> <lora:cat_art:0.4> "
         f"{random.choice(traits)} cat portrait, {style}, "
-        f"sharp focus, detailed fur, expressive eyes, "
+        "solo cat, no people, no person"
+        "sharp focus, detailed fur, expressive eyes, "
         f"based on this adoption bio: ({cat_bio})"
     )
 
     negative_prompt = (
+        "human, person, woman, man, people, body, hands, arms, legs, face, "
+        "portrait of person, humanoid, doll, statue, figure, "
         "blurry, foggy, low contrast, oversaturated, deformed, "
-        "soft focus, AI artifacts, uncanny, malformed, extra limbs, human, ugly"
+        "soft focus, AI artifacts, uncanny, malformed, extra limbs, human, ugly, 1 person"
     )
 
     payload = {
@@ -238,8 +242,16 @@ def generate_cat_image(cat_bio):
         "sampler_name": "Euler a",
         "width": 512,
         "height": 512,
-        "steps": 35,
-        "cfg_scale": 9,
+        "steps": 30,
+        "cfg_scale": 7,
+        "denoising_strength": 0.3,
+        "hr_scale": 2,
+  "hr_upscaler": "ESRGAN_4x",
+  "hr_second_pass_steps": 20,
+  "denoising_strength": 0.3,
+  "clip_skip": 1,
+  "postprocessing": ["face_restoration", "detailer"],
+    "postprocessing_strength": 0.5
     }
 
     r = requests.post("http://127.0.0.1:7860/sdapi/v1/txt2img", json=payload)
